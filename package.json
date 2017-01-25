@@ -1,0 +1,54 @@
+{
+  "name": "tfac",
+  "version": "0.0.0",
+  "description": "Twitch For A Cause",
+  "engines": {
+    "node": "6.5.0"
+  },
+  "main": "server/server.js",
+  "dependencies": {
+    "angular": "1.6.1",
+    "angular-route": "1.6.1",
+    "body-parser": "^1.15.2",
+    "bootstrap": "3.3.6",
+    "colors": "1.1.2",
+    "del": "2.2.0",
+    "es6-promise": "3.2.1",
+    "es6-shim": "0.35.1",
+    "express": "^4.13.4",
+    "gulp": "3.9.1",
+    "gulp-clean-css": "2.0.7",
+    "gulp-concat": "2.6.0",
+    "gulp-jslint": "^1.0.10",
+    "gulp-live-server": "0.0.29",
+    "gulp-plumber": "1.1.0",
+    "gulp-sass": "2.3.1",
+    "gulp-sass-lint": "1.1.1",
+    "gulp-sourcemaps": "1.6.0",
+    "gulp-uglify": "1.5.3",
+    "jquery": "2.2.3",
+    "live-server": "1.0.0",
+    "lodash": "^4.16.4",
+    "pdfjs-dist": "^1.6.471",
+    "run-sequence": "1.2.0",
+    "zone.js": "0.6.23"
+  },
+  "devDependencies": {
+    "gulp-jshint": "^2.0.4",
+    "jasmine-core": "2.4.1",
+    "jshint": "^2.9.4"
+  },
+  "cacheDirectories": [
+    "node_modules"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scmarlatt/twitchForACause"
+  },
+  "keywords": [
+    "angular",
+    "express",
+    "heroku",
+    "node"
+  ]
+}
