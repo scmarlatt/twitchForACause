@@ -1,0 +1,20 @@
+@import '../global/app';
+
+.tfac-mission{
+	background-color: $twitch-purple;
+	height: 25%;
+	width: 100%;
+	padding: 3em 6em;
+	border-top-right-radius: 5em;
+	border-bottom-left-radius: 5em;
+	h2{
+		font-size: 3em;
+		color: #ffffff;
+		font-weight: 700;
+	}
+	p{
+		font-size: 1.2em;
+		font-weight: 100;
+		color: #ffffff;
+	}
+}

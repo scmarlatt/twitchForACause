@@ -29,6 +29,9 @@
     "jquery": "2.2.3",
     "live-server": "1.0.0",
     "lodash": "^4.16.4",
+    "method-override": "2.3.7",
+    "mongoose": "4.7.8",
+    "morgan": "1.7.0",
     "pdfjs-dist": "^1.6.471",
     "run-sequence": "1.2.0",
     "zone.js": "0.6.23"

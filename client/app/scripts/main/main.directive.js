@@ -27,26 +27,39 @@
         }
     }
 
-    TfacController.$inject = ['$scope', '$http'];
+    TfacController.$inject = ['$scope', '$http', 'mainDataService'];
 
-    function TfacController($scope, $http) {
+    function TfacController($scope, $http, mainDataService) {
         // Injecting $scope just for comparison
         var vm = this;
-        vm.init();
 
-        vm.events = ["imaqtpie's bdc stream for blm", "MoonMoon's stream for ozone house", "Riot Games $1000 per kill"];
-        
-
-        vm.init = function () {
-            vm.getUpcomingEvents();
-        }
+        vm.events = ['123', '456', '789', 'scomar1221', 'clintstevens', 'moonmoonow'];
+        vm.eventData = {
+            STREAMER: "scomar1221"
+        };
+        vm.todaysGoal = 1000;
+        vm.totalRaised = 647220;
 
         vm.getUpcomingEvents = function () {
-            $http.get('', function SuccessCallback () {
-
-            }, function ErrorCallback () {
-
+            mainDataService.getUpcomingEvents().then(function (response) {
+                vm.events = response.data;
             });
         };
+
+        vm.postNewEvent = function (eventData) {
+            mainDataService.postNewEvent(eventData).then(function (response) {
+                vm.events = response.data;
+            });
+        };
+
+        vm.deleteEvent = function (eventID) {
+
+        };
+
+        vm.init = function () {
+            //vm.getUpcomingEvents();
+        };
+
+        vm.init();
     }
 })();

@@ -52,7 +52,9 @@ gulp.task('bundle:js', function() {
 gulp.task('minify:js', function() {
   gulp.src(['client/app/**/*.js'])
     .pipe(concat('app.min.js'))
-    .pipe(uglify())
+    .pipe(uglify()).on('error', function(e){
+            console.log(e);
+         })
     .pipe(gulp.dest('public/dist/js'));
 });
 

@@ -11,7 +11,9 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/dist/css/component/tfac-nav.css">
+    <link rel="stylesheet" href="/dist/css/component/tfac-mission.css">    
     <link rel="stylesheet" href="/dist/css/component/tfac-body.css">
+    <link rel="stylesheet" href="/dist/css/component/tfac-bottom.css">
     <link rel="stylesheet" href="/dist/css/global/styles.min.css">
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>    
@@ -19,23 +21,77 @@
 </head>
 <body ng-app="twitchForACause">
 <div class="tfac-nav">
-    <span class="tfac-title">tfac</span>
+    <div class="tfac-title pull-left">
+        tfac
+    </div>
+    <div class="tfac-buttons pull-right">
+        <button type="button" class="btn btn-default tfac-nav-menu pull-right">
+            <span class="glyphicon glyphicon-menu-hamburger"></span>
+        </button>
+    </div>
 </div>
 <tfac-directive>
-    <div class="container-fluid tfac-body">
-        <span class="body-left">
-            <h2>Upcoming Events</h2>
-            <div class="body-left-list">
-                <ul>
-                    <li ng-repeat="event in tfac.events">{{event}}</li>
-                </ul>
+    <div class="container-fluid tfac-mission">
+        <h2>What is tfac?</h2>
+        <br>
+        <p><b>Twitch For A Cause</b> is an effort to revolutionize the way we make charitable contributions. No matter the amount, all donations to charitable organizations are extremely important. Most of the time, it's not in the forefront of our minds exactly how important it is to give back. tfac focuses on "micro donations", enabling streamers - some of the biggest up and coming entertainers in this new age - with the opportunity to pledge and give on a regular basis. <br><br>Looking for a way to have an impact? Join us here and let's revolutionize the way we give back to the world around us.</p>
+    </div>
+    <div class="container-fluid tfac-body-wrapper">
+        <div class="container-fluid tfac-body">
+            <span class="body-left">
+                <h2>Upcoming Events</h2>
+                <div class="body-left-list">
+                    <ul>
+                        <li ng-repeat="event in tfac.events">
+                            <div class="event-list-item">
+                                {{event}}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </span>
+            <span class="body-right">
+                <h2>Impact</h2>
+                <div class="body-right-content">
+                     <ul>
+                        <li>
+                            We have raised a total of <b>{{tfac.totalRaised | currency}}</b>
+                        </li>
+                        <li>
+                            Today, streamers are aiming for a goal of <b>{{tfac.todaysGoal | currency}}</b>
+                        </li>
+                        <li>
+                            You the viewers...
+                        </li>
+                    </ul>
+                </div> 
+            </span>
+        </div>
+    </div>
+    <div class="container-fluid tfac-bottom-wrapper">
+        <div class="bottom-header-wrapper">
+            <h2>Want to give back?</h2>
+        </div>
+        <button type="button" class="create-event-button" data-toggle="modal" data-target="#newEventModal">Create Event</button>
+        <!-- Modal -->
+        <div class="modal fade" id="newEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h2 class="modal-title" id="myModalLabel">New Event</h2>
+                    </div>
+                    <div class="modal-body">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="create-event-button" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="create-event-button">Save Event</button>
+                    </div>
+                </div>
             </div>
-        </span>
-        <span class="body-right">
-            <h2>About tfac</h2>
-            <div class="body-right-content">
-            </div> 
-        </span>
+        </div>
+
     </div>
 </tfac-directive>
 <footer>
