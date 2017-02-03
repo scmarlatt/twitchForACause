@@ -1,0 +1,54 @@
+<div class="container-fluid tfac-body-wrapper">
+    <div class="container-fluid tfac-body">
+        <span class="body-left">
+            <h2>Upcoming Events</h2>
+            <div class="body-left-list">
+                <ul>
+                    <li ng-repeat="event in ec.events">
+                        <div class="event-list-item">
+                            {{event}}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </span>
+        <span class="body-right">
+            <h2>Impact</h2>
+            <div class="body-right-content">
+                 <ul>
+                    <li>
+                        We have raised a total of <b>{{ec.totalRaised | currency}}</b>
+                    </li>
+                    <li>
+                        Today, streamers are aiming for a goal of <b>{{ec.todaysGoal | currency}}</b>
+                    </li>
+                    <li>
+                        You the viewers...
+                    </li>
+                </ul>
+            </div> 
+        </span>
+    </div>
+</div>
+<div class="container-fluid tfac-bottom-wrapper">
+    <h2>Want to give back?</h2>
+    <button type="button" class="create-event-button" data-toggle="modal" data-target="#newEventModal">Create Event</button>
+    <!-- Modal -->
+    <div class="modal fade" id="newEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h2 class="modal-title" id="myModalLabel">New Event</h2>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="create-event-button" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="create-event-button">Save Event</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

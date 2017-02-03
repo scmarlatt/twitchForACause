@@ -11,7 +11,41 @@ const sassLint = require('gulp-sass-lint');
 const uglify = require('gulp-uglify');
 const jshint = require('gulp-jshint');
 const sourcemaps = require('gulp-sourcemaps');
+const mocha = require('gulp-mocha');
+const protractor = require('gulp-angular-protractor');
+const Server = require('karma').Server;
 
+// Karma Tests
+/**
+ * Run test once and exit
+ */
+gulp.task('test:karma', function (done) {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, function(err) {
+    console.log(err);
+    done
+  }).start();
+});
+
+// Mocha Tests
+gulp.task('test:mocha', function () {
+  gulp.src('test/**/*.test.js', {read: false})
+    .pipe(mocha({reporter: 'nyan'}))
+});
+
+//Protractor Tests
+gulp.task('test:protractor', function () {
+  gulp.src(['./e2e/**/*.spec.js'])
+    .pipe(protractor({
+        'configFile': 'protractor.conf.js',
+        'args': ['--baseUrl', 'http://127.0.0.1:9000/home'],
+        'autoStartStopServer': true,
+        'debug': true
+    }))
+    .on('error', function(e) { throw e })
+});
 
 // Clean the js distribution directory
 gulp.task('clean:dist:js', function () {

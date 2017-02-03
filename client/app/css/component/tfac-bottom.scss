@@ -1,23 +1,10 @@
 @import '../global/app';
 
-.bottom-header-wrapper{
-	background-color: $twitch-purple;
-	border-top-left-radius: 5em;
-	height: 10em;
-	padding: 2em;
-	text-align: center;
-	width: 100%;
-	h2{
-		color: #ffffff;
-		font-size: $h-text-size;
-	}
-}
-
 .create-event-button{
-	background-color: #ffffff; /* Green */
+	background-color: $twitch-purple; 
     border: solid;
-    border-color: $twitch-purple;
-    color: $twitch-purple;
+    border-color: #ffffff;
+    color: #ffffff;
     padding: .5em 1em;
     text-align: center;
     text-decoration: none;
@@ -27,7 +14,7 @@
 }
 
 .create-event-button:hover{
-	background-color: #f0f0f0; /* Green */
+	background-color: #f0f0f0;
 }
 
 .create-event-button:focus{
@@ -40,8 +27,13 @@
 }
 
 .tfac-bottom-wrapper{
+	background-color: $twitch-purple;
 	height: 25em;
 	text-align: center;
 	width: 100%;
-	padding: 0;
+	padding: 2em;
+	h2{
+		color: #ffffff;
+		font-size: $h-text-size;
+	}
 }

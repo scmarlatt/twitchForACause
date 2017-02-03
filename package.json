@@ -7,6 +7,7 @@
   },
   "main": "server/server.js",
   "dependencies": {
+    "agenda": "^0.9.0",
     "angular": "1.6.1",
     "angular-route": "1.6.1",
     "body-parser": "^1.15.2",
@@ -16,6 +17,7 @@
     "es6-promise": "3.2.1",
     "es6-shim": "0.35.1",
     "express": "^4.13.4",
+    "express-session": "^1.15.0",
     "gulp": "3.9.1",
     "gulp-clean-css": "2.0.7",
     "gulp-concat": "2.6.0",
@@ -32,14 +34,28 @@
     "method-override": "2.3.7",
     "mongoose": "4.7.8",
     "morgan": "1.7.0",
+    "node-cron": "^1.1.2",
+    "passport": "^0.3.2",
+    "passport-twitchtv": "^0.1.4",
     "pdfjs-dist": "^1.6.471",
     "run-sequence": "1.2.0",
     "zone.js": "0.6.23"
   },
   "devDependencies": {
+    "angular-mocks": "1.6.1",
+    "chai": "3.5.0",
+    "chai-http": "^3.0.0",
+    "gulp-angular-protractor": "^0.3.0",
+    "gulp-jasmine": "2.4.2",
     "gulp-jshint": "^2.0.4",
+    "gulp-mocha": "3.0.1",
     "jasmine-core": "2.4.1",
-    "jshint": "^2.9.4"
+    "jshint": "^2.9.4",
+    "karma": "1.4.0",
+    "karma-chrome-launcher": "2.0.0",
+    "karma-jasmine": "1.1.0",
+    "mocha": "3.2.0",
+    "protractor": "5.0.0"
   },
   "cacheDirectories": [
     "node_modules"

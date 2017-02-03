@@ -2,21 +2,22 @@
     'use strict';
     angular
         .module('twitchForACause')
-        .directive('tfacDirective', tfacDirective);
+        .directive('navDirective', navDirective);
 
     //import { htmlTemplate } from 'main.directve.html';
 
-    function tfacDirective() {
+    function navDirective() {
         var directive = {
             restrict: 'EA',
             /*scope: {
                 
             },*/
+            templateUrl: '/nav',
             link: linkFunc,
-            controller: TfacController,
+            controller: navController,
             // note: This would be 'ExampleController' (the exported controller name, as string)
             // if referring to a defined controller in its separate file.
-            controllerAs: 'tfac',
+            controllerAs: 'nc',
             bindToController: true // because the scope is isolated
         };
 
@@ -27,14 +28,14 @@
         }
     }
 
-    TfacController.$inject = ['$scope', '$http', 'mainDataService', 'userInfoService'];
+    navController.$inject = ['$scope', '$http'];
 
-    function TfacController($scope, $http, mainDataService, userInfoService) {
+    function navController($scope, $http) {
         // Injecting $scope just for comparison
         var vm = this;
 
         vm.init = function () {
-            //vm.getUpcomingEvents();
+
         };
 
         vm.init();
