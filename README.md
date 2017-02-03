@@ -2,8 +2,8 @@
 Twitch charitable pledging web application
 
 ### Up and running
-```>>npm install```
-```>>gulp```
+>>npm install
+>>gulp
 
 Should be running at http://localhost:9000
 Check gulpfile.js for a list of commands. Just running gulp will build and run the project locally and watch most files for changes, although there is some bug in this where it won't always work. Can go over this file some more in detail in the coming days/weeks.
