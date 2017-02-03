@@ -24,7 +24,7 @@ When you build and run it you're going to see an unbelieveable amount of SASS wa
 See package.json for a list of all the dependencies/node_modules we're using. 
 
 ### Testing
-Karma (front end)
-Jasmine
-Mocha (node)
-Protractor (e2e)
+- Karma (front end)
+- Jasmine
+- Mocha (node)
+- Protractor (e2e)
