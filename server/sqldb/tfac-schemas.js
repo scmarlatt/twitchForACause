@@ -66,10 +66,11 @@ var uptimeRuleSchema = mongoose.Schema({
 });
 
 var tfacUserSchema = mongoose.Schema({
-	tfacUsername: String,
 	twitchUsername: String,
+	twitchId: String,
+	twitchAccessToken: String,
 	email: String,
-	age: Number
+	accessLevel: String //admin, general
 	//payment info?
 });
 

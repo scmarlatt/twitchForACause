@@ -17,10 +17,15 @@ describe('Users', () => {
            done();         
         });     
     });
+    afterEach((done) => {
+        tfacSchema.tfacUser.remove({}, (err) => { 
+           done();         
+        });     
+    });
 
     describe('/GET get user', () => {
         it('it should GET a user by id', (done) => {
-            let user = new tfacSchema.tfacUser({tfacUsername: "scmarlatt15",twitchUsername: "scomar1221",email: "scmarlatt15@gmail.com",age: "24"});
+            let user = new tfacSchema.tfacUser({ twitchUsername: "scomar1221", twitchId: "123", twitchAccessToken: "123", email: "scmarlatt15@gmail.com", accessLevel: "admin" });
             user.save((err, user) => {
                 chai.request(server)
                 .get('/api/user/' + user.id)
@@ -28,10 +33,8 @@ describe('Users', () => {
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.a('object');
-                    res.body.should.have.property('tfacUsername');
                     res.body.should.have.property('twitchUsername');
                     res.body.should.have.property('email');
-                    res.body.should.have.property('age');
                     res.body.should.have.property('_id').eql(user.id);
                   done();
                 });
@@ -41,19 +44,17 @@ describe('Users', () => {
 
     describe('/POST update user', () => {
         it('it should update a user ', (done) => {
-          let user = new tfacSchema.tfacUser({tfacUsername: "scmarlatt15",twitchUsername: "scomar1221",email: "scmarlatt15@gmail.com",age: "24"});
+          let user = new tfacSchema.tfacUser({ twitchUsername: "scomar1221", twitchId: "123", twitchAccessToken: "123", email: "scmarlatt15@gmail.com", accessLevel: "admin" });
             user.save((err, user) => {
-                let user2 = {tfacUsername: "scmarlatt16", twitchUsername: "scomar1221",email: "scmarlatt15@gmail.com",age: "24"};
+                let user2 = { twitchUsername: "scomar1221", twitchId: "123", twitchAccessToken: "123", email: "scmarlatt15@gmail.com", accessLevel: "admin" };
                 chai.request(server)
                 .post('/api/user/' + user.id)
                 .send(user2)
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.a('object');
-                    res.body.should.have.property('tfacUsername').eql(user2.tfacUsername);
-                    res.body.should.have.property('twitchUsername');
+                    res.body.should.have.property('twitchUsername').eql(user2.twitchUsername);
                     res.body.should.have.property('email');
-                    res.body.should.have.property('age');
                     res.body.should.have.property('_id').eql(user.id);
                   done();
                 });
@@ -64,10 +65,11 @@ describe('Users', () => {
     describe('/POST add user', () => {
         it('it should POST a user ', (done) => {
             let user = {
-                tfacUsername: "scmarlatt",
                 twitchUsername: "scomar1221",
+                twitchId: "123",
+                twitchAccessToken: "123",
                 email: "scmarlatt15@gmail.com",
-                age: "24"
+                accessLevel: "admin"
             }
             chai.request(server)
             .post('/api/user/newUser')
@@ -75,10 +77,8 @@ describe('Users', () => {
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a('object');
-                res.body.should.have.property('tfacUsername');
                 res.body.should.have.property('twitchUsername');
                 res.body.should.have.property('email');
-                res.body.should.have.property('age');
               done();
             });
         });
@@ -87,17 +87,19 @@ describe('Users', () => {
     describe('/POST user', () => {
         it('it should not POST a second user ', (done) => {
           let user1 = {
-              tfacUsername: "scmarlatt",
               twitchUsername: "scomar1221",
+              twitchId: "123",
+              twitchAccessToken: "123",
               email: "scmarlatt15@gmail.com",
-              age: "24"
+              accessLevel: "admin"
           };
 
           let user2 = {
-              tfacUsername: "scmarlatt",
               twitchUsername: "scomar1221",
+              twitchId: "456",
+              twitchAccessToken: "123",
               email: "scmarlatt15@gmail.com",
-              age: "24"
+              accessLevel: "general"
           };
           chai.request(server)
           .post('/api/user/newUser')
