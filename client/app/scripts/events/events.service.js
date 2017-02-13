@@ -8,9 +8,39 @@
 
 	function eventDataService($http) {
 	    return {
+	    	startEvent: startEvent,
+	    	endEvent: endEvent,
 	        getEvents: getEvents,
 	        postNewEvent: postNewEvent
 	    };
+
+	    function startEvent (twitchId) {
+	    	return $http({
+	        	url: 'api/twitch/event/start',
+	        	method: 'GET',
+	        	params: { twitchId: twitchId }
+	        })
+            .success(function (response) {
+	            return response;
+	        })
+            .error(function (error) {
+	            console.log('XHR Failed for getUpcomingEvents.' + error);
+	        });
+	    }
+
+	    function endEvent (twitchId) {
+	    	return $http({
+	        	url: 'api/twitch/event/end',
+	        	method: 'GET',
+	        	params: { twitchId: twitchId }
+	        })
+            .success(function (response) {
+	            return response;
+	        })
+            .error(function (error) {
+	            console.log('XHR Failed for getUpcomingEvents.' + error);
+	        });
+	    }
 
 	    function getEvents(type) {
 	        return $http({

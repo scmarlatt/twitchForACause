@@ -24,36 +24,29 @@ function getUserById (req, res) {
 // Adding user
 function addUser (req, res) {
     var newUser = new tfacSchema.tfacUser({
-        tfacUsername: req.body.tfacUsername,
         twitchUsername: req.body.twitchUsername,
+        twitchId: req.body.twitchId,
+        twitchAccessToken: req.body.twitchAccessToken,
         email: req.body.email,
         age: req.body.age
     });
 
-    tfacSchema.tfacUser.findOne({'tfacUsername': req.body.tfacUsername}, function (err, user) {
+    tfacSchema.tfacUser.findOne({'twitchUsername': req.body.twitchUsername}, function (err, user) {
         if (err)
             res.status(500).send(err);
         if (user) {
-            res.status(500).send({ "error": "tfac user already exists" });
+            res.status(500).send({ "error": "twitch user already exists" });
         } else {
-            tfacSchema.tfacUser.findOne({'twitchUsername': req.body.twitchUsername}, function (err, user) {
+            tfacSchema.tfacUser.findOne({'email': req.body.email}, function (err, user) {
                 if (err)
                     res.status(500).send(err);
                 if (user) {
-                    res.status(500).send({ "error": "twitch user already exists" });
+                    res.status(500).send({ "error": "email already in use" });
                 } else {
-                    tfacSchema.tfacUser.findOne({'email': req.body.email}, function (err, user) {
-                        if (err)
+                    newUser.save(function (err, user) {
+                        if (err) 
                             res.status(500).send(err);
-                        if (user) {
-                            res.status(500).send({ "error": "email already in use" });
-                        } else {
-                            newUser.save(function (err, user) {
-                                if (err) 
-                                    res.status(500).send(err);
-                                res.json(user);
-                            });
-                        }
+                        res.json(user);
                     });
                 }
             });

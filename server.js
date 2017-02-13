@@ -24,6 +24,9 @@ const session = require('express-session');
 const twitchtvStrategy = require('passport-twitchtv').Strategy;
 const TWITCHTV_CLIENT_ID = 'kn61a7wj2x173shcjb2gimofz6wkki';
 const TWITCHTV_CLIENT_SECRET = 'wnfhy2d7amrebow35ab2sfjixb8p96';
+
+var channelApi = require('./server/api/twitch/channel-info');
+
 //create express app
 const express = require('express');
 const app = express();
@@ -84,6 +87,11 @@ app.get('/nav', function(req,res){
 
 app.get('/events', function(req,res){
 	res.sendFile(__dirname + '/client/app/views/events.html');
+});
+
+app.get('/api/twitch/channel/watch', function (req, res) {
+	channelApi.watchChannelStats('scomar1221');
+	res.status(200).send();
 });
 
 //default redirect

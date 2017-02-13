@@ -1,4 +1,4 @@
-const tfacSchemas = require('./sqldb/tfac-schemas');
+const tfacSchema = require('./sqldb/tfac-schemas');
 const passport = require('passport');
 const session = require('express-session');
 const twitchtvStrategy = require('passport-twitchtv').Strategy;
@@ -10,7 +10,7 @@ function getStrategy() {
 	    clientID: TWITCHTV_CLIENT_ID,
 	    clientSecret: TWITCHTV_CLIENT_SECRET,
 	    callbackURL: "http://localhost:8080/auth/twitchtv/callback",
-	    scope: "user_read"
+	    scopes: ["user_read", "channel_subscriptions"]
   	},
 	function (accessToken, refreshToken, profile, done) {
 
@@ -21,18 +21,17 @@ function getStrategy() {
 	      	// represent the logged-in user.  In a typical application, you would want
 	      	// to associate the Twitch.tv account with a user record in your database,
 	      	// and return that user instead.
-	      	console.log("PROFILE");
-	      	console.log(profile);
+	      	// console.log("PROFILE");
+	      	// console.log(profile);
 	      	console.log(accessToken);
 	      	let profileMatch;
-	      	tfacSchemas.tfacUser.find({twitchUsername: profile.username}, function (err, tfacProfile) {
-	      		console.log(tfacProfile);
+	      	tfacSchema.tfacUser.findOne({twitchUsername: profile.username}, function (err, tfacProfile) {
 	      		if (err) {
 	      			console.log(err);
 	      		}
 	      		if (tfacProfile === undefined || tfacProfile.length === 0) {
 	      			console.log('profileMatch is undefined');
-	      			let newTfacUser = new tfacSchemas.tfacUser({
+	      			let newTfacUser = new tfacSchema.tfacUser({
 	      				twitchUsername: profile.username,
 		      			twitchId: profile._id,
 		      			twitchAccessToken: accessToken,
@@ -41,10 +40,17 @@ function getStrategy() {
 		      		});
 		      		newTfacUser.save(function (err, user) {
 		      			if (err) {
-		      				res.status(500).send(err).redirect('/auth/twitchtv');
+		      				console.log("Error getting profile");
 		      			}
-		      			res.json(user);
 		      		});
+	      		} else {
+	      			tfacProfile.twitchAccessToken = accessToken;
+	      			console.log(tfacProfile);
+	      			tfacSchema.tfacUser.findByIdAndUpdate(tfacProfile._id, tfacProfile, {new: true}, function (err, newProfile) {
+	      				if (err) {
+		      				console.log("Error getting profile");
+		      			}
+	      			});
 	      		}
 	    	}); 
 	    	return done(null, profile);

@@ -36,7 +36,7 @@
 
         vm.events = ['123', '456', '789', 'scomar1221', 'clintstevens', 'moonmoonow'];
         vm.eventData = {
-            STREAMER: "scomar1221"
+            STREAMER: "kjhovey"
         };
         vm.todaysGoal = 1000;
         vm.totalRaised = 647220;
@@ -47,6 +47,13 @@
             });
         };
         */
+        vm.startEvent = function () {
+            eventDataService.startEvent('iddqdow');
+        }
+
+        vm.endEvent = function () {
+            eventDataService.endEvent('iddqdow');
+        }
 
         vm.postNewEvent = function (eventData) {
             eventDataService.postNewEvent(eventData).then(function (response) {

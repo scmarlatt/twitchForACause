@@ -13,18 +13,19 @@ var impactSchema = mongoose.Schema({
 
 //need viewers?
 var streamEventSchema = mongoose.Schema({
-	userID:  String,
+	twitchId:  String,
 	startDate: Date,
-	status: String,
+	status: String, //Upcoming, Active, Completed
 	description: String,
 	organization: String,
-	rules: [{ruleType: String, _id: String}]
+	totalAmountRaised: Number,
+	//goal: Number,
+	rules: [{ruleType: String, _id: String, amountRaised: Number}]
 });
 
 //need viewers?
 var streamStatsSchema = mongoose.Schema({
-	eventID: String,
-	amountRaised: Number,
+	twitchId: String,
 	newSubs: Number,
 	reSubs: Number,
 	deltaSubs: Number,
@@ -37,32 +38,42 @@ var streamStatsSchema = mongoose.Schema({
 
 //Rules need event ID?
 var subRuleSchema = mongoose.Schema({
+	//backers: [{twitchId: String}],
+	subType: String,
 	pledgePerSub: Number,
-	pledgePerReSub: Number,
-	pledgePerNewSub: Number
+	limit: Number
 });
 
 var followerRuleSchema = mongoose.Schema({
-	pledgePerNewFollower: Number
+	//backers: [{twitchId: String}],
+	pledgePerNewFollower: Number,
+	limit: Number
 });
 
 var peakViewerRuleSchema = mongoose.Schema({
+	//backers: [{twitchId: String}],
 	peakViewerGoal: Number,
 	pledgeForPeakViewerGoal: Number
 });
 
 var xViewerRuleSchema = mongoose.Schema({
+	//backers: [{twitchId: String}],
+	pledgePerXViewersUnit: Number,
 	pledgePerXViewersVal: Number,
-	pledgePerXViewersAmount: Number
+	limit: Number
 });
 
 var megaDaysRuleSchema = mongoose.Schema({
+	//backers: [{twitchId: String}],
+	pledgePerPersonMegaDaysUnit: Number,
 	pledgePerPersonMegaDaysVal: Number,
-	pledgePerPersonMegaDaysAmount: Number
+	limit: Number
 });
 
 var uptimeRuleSchema = mongoose.Schema({
-	pledgePerHourUptime: Number
+	//backers: [{twitchId: String}],
+	pledgePerHourUptime: Number,
+	limit: Number
 });
 
 var tfacUserSchema = mongoose.Schema({

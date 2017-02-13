@@ -127,9 +127,10 @@ function createEvent (req, res) {
 	let newEvent = new tfacSchema.streamEvent({
 		userID:  req.body.userID,
 		startDate: req.body.startDate, //must be date format
-		status: req.body.status,
+		status: "Upcoming",
 		description: req.body.description,
 		organization: req.body.organization,
+		totalAmountRaised: 0,
 		rules: []
 	});
 	//iterate over rules and add documents to correct models
@@ -139,9 +140,9 @@ function createEvent (req, res) {
 		switch(req.body.rules[x].ruleType){
 			case "subRule":
 				let newSubRule = new tfacSchema.subRuleSchema({
+					subType: req.body.rules[x].subType,
 					pledgePerSub: req.body.rules[x].pledgePerSub,
-					pledgePerReSub: req.body.rules[x].pledgePerReSub,
-					pledgePerNewSub: req.body.rules[x].pledgePerNewSub
+					limit: req.body.rules[x].limit
 				});
 				newSubRule.save(function (err, newRule) {
 					if (err) {
@@ -153,7 +154,8 @@ function createEvent (req, res) {
 				break;
 			case "followerRule":
 				let newFollowerRule = new tfacSchema.followerRuleSchema({
-					pledgePerNewFollower: req.body.rules[x].pledgePerNewFollower
+					pledgePerNewFollower: req.body.rules[x].pledgePerNewFollower,
+					limit: req.body.rules[x].limit
 				});
 				newFollowerRule.save(function (err, newRule) {
 					if (err) {
@@ -179,7 +181,8 @@ function createEvent (req, res) {
 			case "xViewerRule":
 				let newXViewerRule = new tfacSchema.xViewerRuleSchema({
 					pledgePerXViewersVal: req.body.rules[x].pledgePerXViewersVal,
-					pledgePerXViewersAmount: req.body.rules[x].pledgePerXViewersAmount
+					pledgePerXViewersUnit: req.body.rules[x].pledgePerXViewersUnit,
+					limit: req.body.rules[x].limit
 				});
 				newXViewerRule.save(function (err, newRule) {
 					if (err) {
@@ -192,7 +195,8 @@ function createEvent (req, res) {
 			case "megaDaysRule":
 				let newMegaDaysRule = new tfacSchema.megaDaysRuleSchema({
 					pledgePerPersonMegaDaysVal: req.body.rules[x].pledgePerPersonMegaDaysVal,
-					pledgePerPersonMegaDaysAmount: req.body.rules[x].pledgePerPersonMegaDaysAmount
+					pledgePerPersonMegaDaysUnit: req.body.rules[x].pledgePerPersonMegaDaysUnit,
+					limit: req.body.rules[x].limit
 				});
 				newMegaDaysRule.save(function (err, newRule) {
 					if (err) {
@@ -204,7 +208,8 @@ function createEvent (req, res) {
 				break;
 			case "uptimeRule":
 				let newUptimeRule = new tfacSchema.uptimeRuleSchema({
-					pledgePerHourUptime: req.body.rules[x].pledgePerHourUptime
+					pledgePerHourUptime: req.body.rules[x].pledgePerHourUptime,
+					limit: req.body.rules[x].limit
 				});
 				newUptimeRule.save(function (err, newRule) {
 					if (err) {
