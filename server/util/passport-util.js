@@ -1,16 +1,15 @@
-const tfacSchema = require('./sqldb/tfac-schemas');
+const tfacSchema = require('../sqldb/tfac-schemas');
+const User = require('../models/user-model');
 const passport = require('passport');
 const session = require('express-session');
 const twitchtvStrategy = require('passport-twitchtv').Strategy;
-const TWITCHTV_CLIENT_ID = 'kn61a7wj2x173shcjb2gimofz6wkki';
-const TWITCHTV_CLIENT_SECRET = 'wnfhy2d7amrebow35ab2sfjixb8p96';
 
 function getStrategy() {
 	return new twitchtvStrategy({
-	    clientID: TWITCHTV_CLIENT_ID,
-	    clientSecret: TWITCHTV_CLIENT_SECRET,
-	    callbackURL: "http://localhost:8080/auth/twitchtv/callback",
-	    scopes: ["user_read", "channel_subscriptions"]
+	    clientID: process.env.TWITCHTV_CLIENT_ID,
+	    clientSecret: process.env.TWITCHTV_CLIENT_SECRET,
+	    callbackURL: 'http://localhost:8080/auth/twitchtv/callback',
+	    scopes: ['user_read', 'channel_subscriptions']
   	},
 	function (accessToken, refreshToken, profile, done) {
 
@@ -23,30 +22,28 @@ function getStrategy() {
 	      	// and return that user instead.
 	      	// console.log("PROFILE");
 	      	// console.log(profile);
-	      	console.log(accessToken);
 	      	let profileMatch;
-	      	tfacSchema.tfacUser.findOne({twitchUsername: profile.username}, function (err, tfacProfile) {
+	      	User.findOne({twitchUsername: profile.username}, function (err, tfacProfile) {
 	      		if (err) {
 	      			console.log(err);
 	      		}
 	      		if (tfacProfile === undefined || tfacProfile.length === 0) {
 	      			console.log('profileMatch is undefined');
-	      			let newTfacUser = new tfacSchema.tfacUser({
+	      			let newUser = new User({
 	      				twitchUsername: profile.username,
 		      			twitchId: profile._id,
 		      			twitchAccessToken: accessToken,
 		      			email: profile.email,
 		      			accessLevel: "general"
 		      		});
-		      		newTfacUser.save(function (err, user) {
+		      		newUser.save(function (err, user) {
 		      			if (err) {
 		      				console.log("Error getting profile");
 		      			}
 		      		});
 	      		} else {
 	      			tfacProfile.twitchAccessToken = accessToken;
-	      			console.log(tfacProfile);
-	      			tfacSchema.tfacUser.findByIdAndUpdate(tfacProfile._id, tfacProfile, {new: true}, function (err, newProfile) {
+	      			User.findByIdAndUpdate(tfacProfile._id, tfacProfile, {new: true}, function (err, newProfile) {
 	      				if (err) {
 		      				console.log("Error getting profile");
 		      			}
@@ -59,6 +56,4 @@ function getStrategy() {
 	);
 }
 
-module.exports = {
-	getStrategy: getStrategy
-}
+module.exports = getStrategy;

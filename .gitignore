@@ -2,3 +2,4 @@ node_modules
 mongoinfo.txt
 twitch
 growth-strategy
+.env

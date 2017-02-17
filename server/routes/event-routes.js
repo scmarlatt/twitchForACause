@@ -1,7 +1,6 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var tfacSchema = require('../sqldb/tfac-schemas');
 var express = require('express');
 var router = express.Router();
 let event = require('../api/events-api');

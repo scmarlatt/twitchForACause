@@ -1,10 +1,9 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var tfacSchema = require('../sqldb/tfac-schemas');
-var express = require('express');
-var router = express.Router();
-let user = require('../api/user-api');
+const mongoose = require('mongoose');
+const express = require('express');
+const router = express.Router();
+const userApi = require('../api/user-api');
 
 // middleware that is specific to this router
 /*
@@ -15,16 +14,16 @@ router.use(function timeLog (req, res, next) {
 */
 
 // Get all users
-router.get('/all', user.getUsers);
+router.get('/all', userApi.getUsers);
 
 // Get user info based on user id
-router.get('/:id', user.getUserById);
+router.get('/:id', userApi.getUserById);
 
 // Adding user
-router.post('/newUser', user.addUser);
+router.post('/newUser', userApi.addUser);
 
 // Updating user
-router.post('/:id', user.updateUser);
+router.post('/:id', userApi.updateUser);
 
 //export this router
 module.exports = router;

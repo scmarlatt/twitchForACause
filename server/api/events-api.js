@@ -1,145 +1,146 @@
-//NEEDS:
-
+// NEEDS:
 'use strict';
+const mongoose = require('mongoose');
+const StreamEvent = require('../models/stream-event-model');
+const RulesModel = require('../models/rules-model');
+const Promise = require('bluebird');
+mongoose.Promise = Promise;
 
-var mongoose = require('mongoose');
-var tfacSchema = require('../sqldb/tfac-schemas');
-var express = require('express');
-var router = express.Router();
-
-// middleware that is specific to this router
-router.use(function timeLog (req, res, next) {
-	console.log('Time: ', Date.now())
-	next()
-});
-
-function getEvents (req, res) {
-	tfacSchema.streamEvent.find({}, function (err, eventList) {
-        //handle error
-        if (err)
-            res.status(500).send(err);
+function getEvents(req, res) {
+	StreamEvent.find({}).then((eventList) => {
         res.json(eventList);
+    }).catch((err) => {
+		return res.status(500).send(err);
     });
 }
 
-function getEventsByStatus (req, res) {
-	tfacSchema.streamEvent.find({status: req.params.status}, function (err, eventList) {
-		if (err)
-			res.status(500).send(err);
+function getEventsByStatus(req, res) {
+	StreamEvent.find({status: req.params.status}).then((eventList) => {
 		res.json(eventList);
+	}).catch((err) => {
+		return res.status(500).send(err);
 	});
 }
 
-//Combine with get rules from event?
-function getEventById (req, res) {
-	tfacSchema.streamEvent.findById(req.params.id, function (err, eventMatch) {
-		//handle error
-        if (err)
-            res.status(500).send(err);
+// Combine with get rules from event?
+function getEventById(req, res) {
+	StreamEvent.findById(req.params.id).then((eventMatch) => {
         res.json(eventMatch);
+	}).catch((err) => {
+		res.status(500).send(err);
 	});
 }
 
-function getRulesFromEventById (req, res) {
-	let rulesList = [], x = 0, rulesResponse = {rules: []};
-	tfacSchema.streamEvent.findById(req.params.id, function (err, eventMatch) {
-		//handle error
-        if (err)
-            res.status(500).send(err);
+function getRulesFromEventById(req, res) {
+	let rulesList = [];
+	let x = 0;
+	let rulesResponse = [];
+	let errorEncountered = false;
+	StreamEvent.findById(req.params.id).then((eventMatch) => {
+        console.log("EVENT MATCH");
+        console.log(eventMatch);
         rulesList = eventMatch.rules;
+	}).catch((err) => {
+		return res.status(500).send(err);
 	});
-	for(x; x < rulesList.length; ++x){
-		switch(rulesList[x].ruleType){
-			case "subRule":
-				tfacSchema.subRuleSchema.findById(rulesList[x]._id, function (err, rule) {
-					//handle error
+
+	rulesList.forEach((item) => {
+		console.log("ITEM :::");
+		console.log(item);
+		switch(item.ruleType){
+			case 'SubRule':
+				console.log("SUB RULE FOUND");
+				RulesModel.SubRule.findById(item._id, function (err, rule) {
+					// handle error
 			        if (err) {
 			        	errorEncountered = true;
 			            res.status(500).send(err);
 			        }
-			        rulesResponse.rules.push(rule);
+			        rulesResponse.push(rule);
 				});
 				break;
-			case "followerRule":
-				tfacSchema.followerRuleSchema.findById(rulesList[x]._id, function (err, rule) {
-					//handle error
+			case 'FollowerRule':
+				RulesModel.FollowerRule.findById(item._id, function (err, rule) {
+					// handle error
 			        if (err) {
 			        	errorEncountered = true;
 			            res.status(500).send(err);
 			        }
-			        rulesResponse.rules.push(rule);
+			        rulesResponse.push(rule);
 				});
 				break;
-			case "peakViewerRule":
-				tfacSchema.peakViewerRuleSchema.findById(rulesList[x]._id, function (err, rule) {
-					//handle error
+			case 'PeakViewerRule':
+				RulesModel.PeakViewerRule.findById(item._id, function (err, rule) {
+					// handle error
 			        if (err) {
 			        	errorEncountered = true;
 			            res.status(500).send(err);
 			        }
-			        rulesResponse.rules.push(rule);
+			        rulesResponse.push(rule);
 				});
 				break;
-			case "xViewerRule":
-				tfacSchema.xViewerRuleSchema.findById(rulesList[x]._id, function (err, rule) {
-					//handle error
+			case 'XViewerRule':
+				RulesModel.XViewerRule.findById(item._id, function (err, rule) {
+					// handle error
 			        if (err) {
 			        	errorEncountered = true;
 			            res.status(500).send(err);
 			        }
-			        rulesResponse.rules.push(rule);
+			        rulesResponse.push(rule);
 				});
 				break;
-			case "megaDaysRule":
-				tfacSchema.megaDaysRuleSchema.findById(rulesList[x]._id, function (err, rule) {
-					//handle error
+			case 'MegaDaysRule':
+				RulesModel.MegaDaysRule.findById(item._id, function (err, rule) {
+					// handle error
 			        if (err) {
 			        	errorEncountered = true;
 			            res.status(500).send(err);
 			        }
-			        rulesResponse.rules.push(rule);
+			        rulesResponse.push(rule);
 				});
 				break;
-			case "uptimeRule":
-				tfacSchema.uptimeRuleSchema.findById(rulesList[x]._id, function (err, rule) {
-					//handle error
+			case 'UptimeRule':
+				RulesModel.UptimeRule.findById(item._id, function (err, rule) {
+					// handle error
 			        if (err) {
 			        	errorEncountered = true;
 			            res.status(500).send(err);
 			        }
-			        rulesResponse.rules.push(rule);
+			        rulesResponse.push(rule);
 				});
 				break;
 			default:
-				res.status(500).send({err: "Unrecognized rule type"});
+				res.status(500).send({err: 'Unrecognized rule type'});
 				errorEncountered = true;
 				break;
 		}
-	}
+	});
+
 	if(!errorEncountered){
-		res.json(rulesResponse);
+		//res.json(rulesResponse);
+		res.status(200).send(rulesResponse);
 	}
 }
 
-//NEED SOME WAY TO CHECK FOR DUPES???
+// NEED SOME WAY TO CHECK FOR DUPES???
 function createEvent (req, res) {
-	//create event to save
-	let newEvent = new tfacSchema.streamEvent({
+	// create event to save
+	let newEvent = new StreamEvent({
 		userID:  req.body.userID,
-		startDate: req.body.startDate, //must be date format
-		status: "Upcoming",
+		startDate: req.body.startDate, // must be date format
+		status: 'Upcoming',
 		description: req.body.description,
 		organization: req.body.organization,
 		totalAmountRaised: 0,
 		rules: []
 	});
-	//iterate over rules and add documents to correct models
+	// iterate over rules and add documents to correct models
 	let x;
 	let errorEncountered = false;
 	for(x = 0; x < req.body.rules.length; ++x){
 		switch(req.body.rules[x].ruleType){
-			case "subRule":
-				let newSubRule = new tfacSchema.subRuleSchema({
+			case 'SubRule':
+				let newSubRule = new RulesModel.SubRule({
 					subType: req.body.rules[x].subType,
 					pledgePerSub: req.body.rules[x].pledgePerSub,
 					limit: req.body.rules[x].limit
@@ -149,11 +150,11 @@ function createEvent (req, res) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
-					newEvent.rules.push({ruleType: "subRule", _id: newRule._id});
+					newEvent.rules.push({ruleType: 'SubRule', _id: newRule._id});
 				});
 				break;
-			case "followerRule":
-				let newFollowerRule = new tfacSchema.followerRuleSchema({
+			case 'FollowerRule':
+				let newFollowerRule = new RulesModel.FollowerRule({
 					pledgePerNewFollower: req.body.rules[x].pledgePerNewFollower,
 					limit: req.body.rules[x].limit
 				});
@@ -162,11 +163,11 @@ function createEvent (req, res) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
-					newEvent.rules.push({ruleType: "followerRule", _id: newRule._id});
+					newEvent.rules.push({ruleType: 'FollowerRule', _id: newRule._id});
 				});
 				break;
-			case "peakViewerRule":
-				let newPeakViewerRule = new tfacSchema.peakViewerRuleSchema({
+			case 'PeakViewerRule':
+				let newPeakViewerRule = new RulesModel.PeakViewerRule({
 					peakViewerGoal: req.body.rules[x].peakViewerGoal,
 					pledgeForPeakViewerGoal: req.body.rules[x].pledgeForPeakViewerGoal
 				});
@@ -175,11 +176,11 @@ function createEvent (req, res) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
-					newEvent.rules.push({ruleType: "peakViewerRule", _id: newRule._id});
+					newEvent.rules.push({ruleType: 'PeakViewerRule', _id: newRule._id});
 				});
 				break;
-			case "xViewerRule":
-				let newXViewerRule = new tfacSchema.xViewerRuleSchema({
+			case 'XViewerRule':
+				let newXViewerRule = new RulesModel.XViewerRule({
 					pledgePerXViewersVal: req.body.rules[x].pledgePerXViewersVal,
 					pledgePerXViewersUnit: req.body.rules[x].pledgePerXViewersUnit,
 					limit: req.body.rules[x].limit
@@ -189,11 +190,11 @@ function createEvent (req, res) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
-					newEvent.rules.push({ruleType: "xViewerRule", _id: newRule._id});
+					newEvent.rules.push({ruleType: 'XViewerRule', _id: newRule._id});
 				});
 				break;
-			case "megaDaysRule":
-				let newMegaDaysRule = new tfacSchema.megaDaysRuleSchema({
+			case 'MegaDaysRule':
+				let newMegaDaysRule = new RulesModel.MegaDaysRule({
 					pledgePerPersonMegaDaysVal: req.body.rules[x].pledgePerPersonMegaDaysVal,
 					pledgePerPersonMegaDaysUnit: req.body.rules[x].pledgePerPersonMegaDaysUnit,
 					limit: req.body.rules[x].limit
@@ -203,11 +204,11 @@ function createEvent (req, res) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
-					newEvent.rules.push({ruleType: "megaDaysRule", _id: newRule._id});
+					newEvent.rules.push({ruleType: 'MegaDaysRule', _id: newRule._id});
 				});
 				break;
-			case "uptimeRule":
-				let newUptimeRule = new tfacSchema.uptimeRuleSchema({
+			case 'UptimeRule':
+				let newUptimeRule = new RulesModel.UptimeRule({
 					pledgePerHourUptime: req.body.rules[x].pledgePerHourUptime,
 					limit: req.body.rules[x].limit
 				});
@@ -216,18 +217,18 @@ function createEvent (req, res) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
-					newEvent.rules.push({ruleType: "uptimeRule", _id: newRule._id});
+					newEvent.rules.push({ruleType: 'UptimeRule', _id: newRule._id});
 				});
 				break;
 			default:
-				res.status(500).send({err: "Unrecognized rule type"});
+				res.status(500).send({err: 'Unrecognized rule type'});
 				errorEncountered = true;
 				break;
 		}
 	}
 
 	if (!errorEncountered) {
-		//save event if all rules added successfully
+		// save event if all rules added successfully
 		newEvent.save(function (err, newEvent) {
 		    if (err) {
 		        res.status(500).send(err)
@@ -236,176 +237,96 @@ function createEvent (req, res) {
 		    res.status(200).send();
 		});
 	}
-	//ADD ELSE CLAUSE?
+	// ADD ELSE CLAUSE?
 }
 
 // NEED TO ACCOUNT FOR RULES AS WELL
-function updateEventById (req, res) {
-	//update event
-	tfacSchema.streamEvent.findByIdAndUpdate(req.params.id, req.body, {'new': true}, function (err, updatedEvent) {
-		//handle error
-        if (err) {
-            res.status(500).send(err);
-        }
+function updateEventById(req, res) {
+	// update event
+	StreamEvent.findByIdAndUpdate(req.params.id, req.body, {'new': true}).then((updatedEvent) => {
         res.json(updatedEvent);
+	}).catch((err) => {
+		return res.status(500).send(err);
 	});
 }
 
-function createRule (req, res) {
-	let schemaName = req.body.ruleType + "Schema";
-	let newRule = new tfacSchema[schemaName](req.body.rule);
-	newRule.save(function (err, newRule) {
-		if (err) {
-            res.status(500).send(err);
-        }
+function createRule(req, res) {
+	let ruleName = req.body.ruleType;
+	let newRule = new RulesModel[ruleName](req.body.rule);
+	newRule.save().then((newRule) => {
         res.json(updatedEvent);
+	}).catch((err) => {
+		return res.status(500).send(err);
 	});
 }
 
-function updateRule (req, res) {
-	let schemaName = req.body.ruleType + "Schema";
-	tfacSchema[schemaName].findByIdAndUpdate(req.body._id, req.body, {'new': true}, function (err, updatedEvent) {
-		//handle error
-        if (err) {
-            res.status(500).send(err);
-        }
+function updateRule(req, res) {
+	let ruleName = req.body.ruleType;
+	RulesModel[ruleName].findByIdAndUpdate(req.body._id, req.body, {'new': true}).then((updatedEvent) => {
         res.json(updatedEvent);
+	}).catch((err) => {
+		return res.status(500).send(err);
 	});
 }
 
-function deleteRule (req, res) {
-	let schemaName = req.body.ruleType + "Schema";
-	tfacSchema[schemaName].remove({id: req.body._id}, function(err) {
-		if (err)
-			res.status(500).send(err);
+function deleteRule(req, res) {
+	let ruleName = req.body.ruleType;
+	RulesModel[ruleName].remove({id: req.body._id}).then(() => {
 		res.status(200).send();
+	}).catch((err) => {
+		return res.status(500).send(err);
 	});
 }
 
-/*
-//update rules, on .success, update event
-function updateEventRules (req, res) {
-	let x, newRules = [];
-	for(x = 0; x < req.body.rules.length; ++x){
-		switch(req.body.rules[x].ruleType){
-			case "subRule":
-				tfacSchema.subRuleSchema.findByIdAndUpdate(req.body.rules[x]._id, req.body.rules[x], {'new': true}, function (err, rule) {
-					//handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        newRules.push(rule);
-				});
-				break;
-			case "followerRule":
-				tfacSchema.followerRuleSchema.findByIdAndUpdate(req.body.rules[x]._id, req.body.rules[x], {'new': true}, function (err, rule) {
-					//handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        newRules.push(rule);
-				});
-				break;
-			case "peakViewerRule":
-				tfacSchema.peakViewerRuleSchema.findByIdAndUpdate(req.body.rules[x]._id, req.body.rules[x], {'new': true}, function (err, rule) {
-					//handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        newRules.push(rule);
-				});
-				break;
-			case "xViewerRule":
-				tfacSchema.xViewerRuleSchema.findByIdAndUpdate(req.body.rules[x]._id, req.body.rules[x], {'new': true}, function (err, rule) {
-					//handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        newRules.push(rule);
-				});
-				break;
-			case "megaDaysRule":
-				tfacSchema.megaDaysRuleSchema.findByIdAndUpdate(req.body.rules[x]._id, req.body.rules[x], {'new': true}, function (err, rule) {
-					//handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        newRules.push(rule);
-				});
-				break;
-			case "uptimeRule":
-				tfacSchema.uptimeRuleSchema.findByIdAndUpdate(req.body.rules[x]._id, req.body.rules[x], {'new': true}, function (err, rule) {
-					//handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        newRules.push(rule);
-				});
-				break;
-			default:
-				res.status(500).send({err: "Unrecognized rule type"});
-				errorEncountered = true;
-				break;
-		}
-	}
-}
-*/
-
-//NEED SOME WAY TO CHECK FOR DUPES???
-function deleteEventById (req, res) {
-	//iterate over rules and add documents to correct models
+// NEED SOME WAY TO CHECK FOR DUPES???
+function deleteEventById(req, res) {
+	// iterate over rules and add documents to correct models
 	let x;
 	let errorEncountered = false;
 	for(x = 0; x < req.body.rules.length; ++x){
 		switch(req.body.rules[x].ruleType){
-			case "subRule":
-				tfacSchema.subRuleSchema.remove({id: req.body.rules[x]._id}, function(err) {
+			case 'SubRule':
+				RulesModel.SubRule.remove({id: req.body.rules[x]._id}, function(err) {
 					if (err) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
 				});
 				break;
-			case "followerRule":
-				tfacSchema.followerRuleSchema.remove({id: req.body.rules[x]._id}, function(err) {
+			case 'FollowerRule':
+				RulesModel.FollowerRule.remove({id: req.body.rules[x]._id}, function(err) {
 					if (err) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
 				});
 				break;
-			case "peakViewerRule":
-				tfacSchema.peakViewerRuleSchema.remove({id: req.body.rules[x]._id}, function(err) {
+			case 'PeakViewerRule':
+				RulesModel.PeakViewerRule.remove({id: req.body.rules[x]._id}, function(err) {
 					if (err) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
 				});
 				break;
-			case "xViewerRule":
-				tfacSchema.xViewerRuleSchema.remove({id: req.body.rules[x]._id}, function(err) {
+			case 'XViewerRule':
+				RulesModel.XViewerRule.remove({id: req.body.rules[x]._id}, function(err) {
 					if (err) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
 				});
 				break;
-			case "megaDaysRule":
-				tfacSchema.megaDaysRuleSchema.remove({id: req.body.rules[x]._id}, function(err) {
+			case 'MegaDaysRule':
+				RulesModel.MegaDaysRule.remove({id: req.body.rules[x]._id}, function(err) {
 					if (err) {
 						errorEncountered = true;
 						res.status(500).send(err);
 					}
 				});
 				break;
-			case "uptimeRule":
-				tfacSchema.uptimeRuleSchema.remove({id: req.body.rules[x]._id}, function(err) {
+			case 'UptimeRule':
+				RulesModel.UptimeRule.remove({id: req.body.rules[x]._id}, function(err) {
 					if (err) {
 						errorEncountered = true;
 						res.status(500).send(err);
@@ -413,23 +334,24 @@ function deleteEventById (req, res) {
 				});
 				break;
 			default:
-				res.status(500).send({err: "Unrecognized rule type"});
+				res.status(500).send({err: 'Unrecognized rule type'});
 				errorEncountered = true;
 				break;
 		}
 	}
 
+	// consider changing this to a promise with a .catch
 	if (!errorEncountered) {
-		tfacSchema.streamEvent.remove({id: req.params.id}, function(err) {
+		StreamEvent.remove({id: req.params.id}, function(err) {
 			if (err)
 				res.status(500).send(err);
 			res.status(200).send();
 		});
 	}
-	//ADD ELSE CLAUSE?
+	// ADD ELSE CLAUSE?
 }
 
-//export this router
+// export this router
 module.exports = { 
 	getEvents: getEvents,
  	getEventsByStatus: getEventsByStatus, 

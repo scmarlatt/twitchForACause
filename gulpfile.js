@@ -31,7 +31,7 @@ gulp.task('test:karma', function (done) {
 
 // Mocha Tests
 gulp.task('test:mocha', function () {
-  gulp.src('test/**/*.test.js', {read: false})
+  gulp.src('test/event-routes.test.js', {read: false})
     .pipe(mocha({reporter: 'nyan'}))
 });
 

@@ -1,29 +1,29 @@
-let mongoose = require('mongoose');
-let tfacSchema = require('../sqldb/tfac-schemas');
+const mongoose = require('mongoose');
+const Promise = require('bluebird');
+mongoose.Promise = Promise;
+const User = require('../models/user-model');
 
 // Get user info based on user id
-function getUsers (req, res) {
-    tfacSchema.tfacUser.find({}, function (err, users) {
-        //handle error
-        if (err)
-            res.status(500).send(err);
+function getUsers(req, res) {
+    User.find({}).then((users) => {
         res.json(users);
+    }).catch((err) => {
+        return res.status(500).send(err);
     });
 }
 
 // Get user info based on user id
-function getUserById (req, res) {
-    tfacSchema.tfacUser.findById(req.params.id, function (err, user) {
-        //handle error
-        if (err)
-            res.status(500).send(err);
+function getUserById(req, res) {
+    User.findById(req.params.id).then((user) => {
         res.json(user);
+    }).catch((err) => {
+        return res.status(500).send(err);
     });
 }
 
 // Adding user
-function addUser (req, res) {
-    var newUser = new tfacSchema.tfacUser({
+function addUser(req, res) {
+    let newUser = new User({
         twitchUsername: req.body.twitchUsername,
         twitchId: req.body.twitchId,
         twitchAccessToken: req.body.twitchAccessToken,
@@ -31,39 +31,38 @@ function addUser (req, res) {
         age: req.body.age
     });
 
-    tfacSchema.tfacUser.findOne({'twitchUsername': req.body.twitchUsername}, function (err, user) {
-        if (err)
-            res.status(500).send(err);
-        if (user) {
-            res.status(500).send({ "error": "twitch user already exists" });
+    User.findOne({'twitchUsername': req.body.twitchUsername}).then((userByEmail) => {
+        if (userByEmail) {
+            return res.status(500).send({'error': 'twitch user already exists'});
         } else {
-            tfacSchema.tfacUser.findOne({'email': req.body.email}, function (err, user) {
-                if (err)
-                    res.status(500).send(err);
-                if (user) {
-                    res.status(500).send({ "error": "email already in use" });
-                } else {
-                    newUser.save(function (err, user) {
-                        if (err) 
-                            res.status(500).send(err);
-                        res.json(user);
-                    });
-                }
-            });
+            return User.findOne({'email': req.body.email});
         }
+    }).then((userByEmail) => {
+        if (userByEmail) {
+            res.status(500).send({'error': 'email already in use'});
+        } else {
+            return newUser.save();
+        }
+    }).then((userSaved) => {
+        res.json(userSaved);
+    }).catch((err) => {
+        res.status(500).send(err);
     });
 }
 
 // Updating user
-function updateUser (req, res) {
-    tfacSchema.tfacUser.findByIdAndUpdate(req.params.id, req.body, {'new': true}, function (err, user) {
-        //handle error
-        if (err) {
-            res.status(500).send(err);
-        }
+function updateUser(req, res) {
+    User.findByIdAndUpdate(req.params.id, req.body, {'new': true}).then((user) => {
         res.json(user);
+    }).catch((err) => {
+        res.status(500).send(err);
     });
 }
 
-//export all the functions
-module.exports = { getUsers: getUsers, getUserById: getUserById, addUser: addUser, updateUser: updateUser };
+// export all the functions
+module.exports = {
+    getUsers: getUsers,
+    getUserById: getUserById,
+    addUser: addUser,
+    updateUser: updateUser
+};

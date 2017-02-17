@@ -1,7 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var tfacSchema = require('../sqldb/tfac-schemas');
+var Impact = require('../models/impact-model');
 var express = require('express');
 var router = express.Router();
 
@@ -34,12 +34,12 @@ router.get('/get', function (req, res) {
 
 // Insert impact statistics
 router.get('/insert', function (req, res) {
-	tfacSchema.impact.insert(req.body);
+	Impact.insert(req.body);
 });
 
 // Update impact statistics
 router.get('/update/id', function (req, res) {
-	tfacSchema.impact.findById(req.id, function (err, impact) {
+	Impact.findById(req.id, function (err, impact) {
 		if (err)
 			res.send(err);
 		impact = req.body;
