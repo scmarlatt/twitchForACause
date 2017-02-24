@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Promise = require('bluebird');
+const validator = require('../util/validate-fields-util');
 mongoose.Promise = Promise;
 const User = require('../models/user-model');
 
@@ -23,6 +24,11 @@ function getUserById(req, res) {
 
 // Adding user
 function addUser(req, res) {
+    let fields = ['twitchUsername', 'twitchId', 'twitchAccessToken', 'email', 'age'];
+    if(!validator.validateFields(req.body, fields)) {
+        return res.status(500).send({err: 'Invalid input object'});
+    }
+
     let newUser = new User({
         twitchUsername: req.body.twitchUsername,
         twitchId: req.body.twitchId,
@@ -52,6 +58,11 @@ function addUser(req, res) {
 
 // Updating user
 function updateUser(req, res) {
+    let fields = ['twitchUsername', 'twitchId', 'twitchAccessToken', 'email', 'age'];
+    if(!validator.validateFields(req.body, fields)) {
+        return res.status(500).send({err: 'Invalid input object'});
+    }
+    
     User.findByIdAndUpdate(req.params.id, req.body, {'new': true}).then((user) => {
         res.json(user);
     }).catch((err) => {

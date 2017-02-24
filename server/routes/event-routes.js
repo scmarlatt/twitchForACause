@@ -32,13 +32,13 @@ router.post('/create', event.createEvent);
 router.post('/update/:id', event.updateEventById);
 
 // Creating rule
-router.post('/update/rules/create', event.createRule);
+router.post('/update/rules/create/:id', event.createRule);
 
 // Updating rule
 router.post('/update/rules/update', event.updateRule);
 
 // Delete rule
-router.post('/update/rules/delete', event.deleteRule);
+router.post('/update/rules/delete/:id', event.deleteRule);
 
 // Delete event by id
 router.post('/delete/:id', event.deleteEventById);

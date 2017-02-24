@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const path = require('path');
 const cron = require('node-cron')
+const fs = require('fs');
 const request = require('request');
 const Promise = require('bluebird');
 // db
@@ -87,6 +88,44 @@ app.get('/events', function(req,res){
 app.get('/api/twitch/channel/watch', function (req, res) {
 	channelApi.watchChannelStats('scomar1221');
 	res.status(200).send();
+});
+
+app.get('/parse/npo', function(req, res) {
+	let npoFile = [];
+	let finalData = [];
+	fs.readFile('./data-download-pub78.txt', (err, data) => {
+		if(err) throw err;
+		npoFile = data.toString().split('\n');
+		let x;
+		for(x = 0; x < 10; ++x) {
+			let npoData = npoFile[x].split('|');
+			let obj = {
+				ein: npoData[0],
+				name: npoData[1],
+				city: npoData[2],
+				state: npoData[3],
+				country: npoData[4],
+				deducStatus: npoData[5].slice(npoData[5].length - 1, 1)
+			};
+			finalData.push(obj);
+		}
+		// npoFile.forEach((line) => {
+		// 	let npoData = line.split('|');
+		// 	let obj = {
+		// 		ein: npoData[0],
+		// 		name: npoData[1],
+		// 		city: npoData[2],
+		// 		state: npoData[3],
+		// 		country: npoData[4],
+		// 		deducStatus: npoData[5]
+		// 	};
+		// 	finalData.push(obj);
+		// });
+		fs.writeFile('npo.json', JSON.stringify(finalData), (err, data) => {
+			if (err) throw err;
+  			console.log('It\'s saved!');
+		});
+	});
 });
 
 // default redirect

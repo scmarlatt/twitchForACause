@@ -1,14 +1,17 @@
 // NEEDS:
+// FOR ALL POSTS, MAKE SURE YOU DO INPUT VALIDATIONS
 'use strict';
 const mongoose = require('mongoose');
 const StreamEvent = require('../models/stream-event-model');
 const RulesModel = require('../models/rules-model');
 const Promise = require('bluebird');
+const validator = require('../util/validate-fields-util');
+const hasOwn = {}.hasOwnProperty;
 mongoose.Promise = Promise;
 
 function getEvents(req, res) {
 	StreamEvent.find({}).then((eventList) => {
-        res.json(eventList);
+        res.status(200).send(eventList);
     }).catch((err) => {
 		return res.status(500).send(err);
     });
@@ -16,7 +19,7 @@ function getEvents(req, res) {
 
 function getEventsByStatus(req, res) {
 	StreamEvent.find({status: req.params.status}).then((eventList) => {
-		res.json(eventList);
+		res.status(200).send(eventList);
 	}).catch((err) => {
 		return res.status(500).send(err);
 	});
@@ -25,7 +28,7 @@ function getEventsByStatus(req, res) {
 // Combine with get rules from event?
 function getEventById(req, res) {
 	StreamEvent.findById(req.params.id).then((eventMatch) => {
-        res.json(eventMatch);
+        res.status(200).send(eventMatch);
 	}).catch((err) => {
 		res.status(500).send(err);
 	});
@@ -33,100 +36,37 @@ function getEventById(req, res) {
 
 function getRulesFromEventById(req, res) {
 	let rulesList = [];
-	let x = 0;
 	let rulesResponse = [];
-	let errorEncountered = false;
+
 	StreamEvent.findById(req.params.id).then((eventMatch) => {
-        console.log("EVENT MATCH");
-        console.log(eventMatch);
         rulesList = eventMatch.rules;
+
+        let ruleListPromises = rulesList.map((rule) => {
+			return RulesModel[rule.ruleType].findById(rule._id);
+		});
+
+		return Promise.all(ruleListPromises);
+	}).then((rules) => {
+		rules.forEach((item) => {
+			rulesResponse.push(item);
+		});
+
+		return res.status(200).send(rulesResponse);
 	}).catch((err) => {
 		return res.status(500).send(err);
 	});
-
-	rulesList.forEach((item) => {
-		console.log("ITEM :::");
-		console.log(item);
-		switch(item.ruleType){
-			case 'SubRule':
-				console.log("SUB RULE FOUND");
-				RulesModel.SubRule.findById(item._id, function (err, rule) {
-					// handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        rulesResponse.push(rule);
-				});
-				break;
-			case 'FollowerRule':
-				RulesModel.FollowerRule.findById(item._id, function (err, rule) {
-					// handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        rulesResponse.push(rule);
-				});
-				break;
-			case 'PeakViewerRule':
-				RulesModel.PeakViewerRule.findById(item._id, function (err, rule) {
-					// handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        rulesResponse.push(rule);
-				});
-				break;
-			case 'XViewerRule':
-				RulesModel.XViewerRule.findById(item._id, function (err, rule) {
-					// handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        rulesResponse.push(rule);
-				});
-				break;
-			case 'MegaDaysRule':
-				RulesModel.MegaDaysRule.findById(item._id, function (err, rule) {
-					// handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        rulesResponse.push(rule);
-				});
-				break;
-			case 'UptimeRule':
-				RulesModel.UptimeRule.findById(item._id, function (err, rule) {
-					// handle error
-			        if (err) {
-			        	errorEncountered = true;
-			            res.status(500).send(err);
-			        }
-			        rulesResponse.push(rule);
-				});
-				break;
-			default:
-				res.status(500).send({err: 'Unrecognized rule type'});
-				errorEncountered = true;
-				break;
-		}
-	});
-
-	if(!errorEncountered){
-		//res.json(rulesResponse);
-		res.status(200).send(rulesResponse);
-	}
 }
 
 // NEED SOME WAY TO CHECK FOR DUPES???
-function createEvent (req, res) {
+function createEvent(req, res) {
+	// input validation
+	let fields = ['twitchId', 'startDate', 'description', 'organization', 'rules'];
+	if(!validator.validateFields(req.body, fields) || req.body.rules.length === 0) {
+		return res.status(500).send({err: 'Invalid input object'});
+	}
 	// create event to save
 	let newEvent = new StreamEvent({
-		userID:  req.body.userID,
+		twitchId: req.body.twitchId,
 		startDate: req.body.startDate, // must be date format
 		status: 'Upcoming',
 		description: req.body.description,
@@ -134,115 +74,90 @@ function createEvent (req, res) {
 		totalAmountRaised: 0,
 		rules: []
 	});
-	// iterate over rules and add documents to correct models
-	let x;
-	let errorEncountered = false;
-	for(x = 0; x < req.body.rules.length; ++x){
-		switch(req.body.rules[x].ruleType){
-			case 'SubRule':
-				let newSubRule = new RulesModel.SubRule({
-					subType: req.body.rules[x].subType,
-					pledgePerSub: req.body.rules[x].pledgePerSub,
-					limit: req.body.rules[x].limit
-				});
-				newSubRule.save(function (err, newRule) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-					newEvent.rules.push({ruleType: 'SubRule', _id: newRule._id});
-				});
-				break;
-			case 'FollowerRule':
-				let newFollowerRule = new RulesModel.FollowerRule({
-					pledgePerNewFollower: req.body.rules[x].pledgePerNewFollower,
-					limit: req.body.rules[x].limit
-				});
-				newFollowerRule.save(function (err, newRule) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-					newEvent.rules.push({ruleType: 'FollowerRule', _id: newRule._id});
-				});
-				break;
-			case 'PeakViewerRule':
-				let newPeakViewerRule = new RulesModel.PeakViewerRule({
-					peakViewerGoal: req.body.rules[x].peakViewerGoal,
-					pledgeForPeakViewerGoal: req.body.rules[x].pledgeForPeakViewerGoal
-				});
-				newPeakViewerRule.save(function (err, newRule) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-					newEvent.rules.push({ruleType: 'PeakViewerRule', _id: newRule._id});
-				});
-				break;
-			case 'XViewerRule':
-				let newXViewerRule = new RulesModel.XViewerRule({
-					pledgePerXViewersVal: req.body.rules[x].pledgePerXViewersVal,
-					pledgePerXViewersUnit: req.body.rules[x].pledgePerXViewersUnit,
-					limit: req.body.rules[x].limit
-				});
-				newXViewerRule.save(function (err, newRule) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-					newEvent.rules.push({ruleType: 'XViewerRule', _id: newRule._id});
-				});
-				break;
-			case 'MegaDaysRule':
-				let newMegaDaysRule = new RulesModel.MegaDaysRule({
-					pledgePerPersonMegaDaysVal: req.body.rules[x].pledgePerPersonMegaDaysVal,
-					pledgePerPersonMegaDaysUnit: req.body.rules[x].pledgePerPersonMegaDaysUnit,
-					limit: req.body.rules[x].limit
-				});
-				newMegaDaysRule.save(function (err, newRule) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-					newEvent.rules.push({ruleType: 'MegaDaysRule', _id: newRule._id});
-				});
-				break;
-			case 'UptimeRule':
-				let newUptimeRule = new RulesModel.UptimeRule({
-					pledgePerHourUptime: req.body.rules[x].pledgePerHourUptime,
-					limit: req.body.rules[x].limit
-				});
-				newUptimeRule.save(function (err, newRule) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-					newEvent.rules.push({ruleType: 'UptimeRule', _id: newRule._id});
-				});
-				break;
-			default:
-				res.status(500).send({err: 'Unrecognized rule type'});
-				errorEncountered = true;
-				break;
+	// create promise.all
+	// for each rule, add reference of it to newEvent.rules array, save rule
+	// save new event
+	let rulePromises = req.body.rules.map((rule) => {
+		let newRule;
+		if(!hasOwn.call(rule, 'ruleType')) {
+			return res.status(500).send({err: 'Invalid rule object'});
+		} else {
+			if(!validator.validateFieldsByRule(rule)) {
+				return res.status(500).send({err: 'Invalid rule object'});
+			}
+			switch(rule.ruleType) {
+				case 'SubRule':
+					newRule = new RulesModel.SubRule({
+						ruleType: 'SubRule',
+						subType: rule.subType,
+						pledgePerSub: rule.pledgePerSub,
+						limit: rule.limit
+					});
+					break;
+				case 'FollowerRule':
+					newRule = new RulesModel.FollowerRule({
+						ruleType: 'FollowerRule',
+						pledgePerNewFollower: rule.pledgePerNewFollower,
+						limit: rule.limit
+					});
+					break;
+				case 'PeakViewerRule':
+					newRule = new RulesModel.PeakViewerRule({
+						ruleType: 'PeakViewerRule',
+						peakViewerGoal: rule.peakViewerGoal,
+						pledgeForPeakViewerGoal: rule.pledgeForPeakViewerGoal
+					});
+					break;
+				case 'XViewerRule':
+					newRule = new RulesModel.XViewerRule({
+						ruleType: 'XViewerRule',
+						pledgePerXViewersUnit: rule.pledgePerXViewersUnit,
+						pledgePerXViewersVal: rule.pledgePerXViewersVal,
+						limit: rule.limit
+					});
+					break;
+				case 'MegaDaysRule':
+					newRule = new RulesModel.MegaDaysRule({
+						ruleType: 'MegaDaysRule',
+						pledgePerPersonMegaDaysUnit: rule.pledgePerPersonMegaDaysUnit,
+						pledgePerPersonMegaDaysVal: rule.pledgePerPersonMegaDaysVal,
+						limit: rule.limit
+					});
+					break;
+				case 'UptimeRule':
+					newRule = new RulesModel.UptimeRule({
+						ruleType: 'UptimeRule',
+						pledgePerHourUptime: rule.pledgePerHourUptime,
+						limit: rule.limit
+					});
+					break;
+				default:
+					return res.status(500).send({err: 'Unrecognized rule type'});
+			}
 		}
-	}
+		return newRule.save();
+	});
 
-	if (!errorEncountered) {
-		// save event if all rules added successfully
-		newEvent.save(function (err, newEvent) {
-		    if (err) {
-		        res.status(500).send(err)
-		    }
-		    res.body.newEvent = newEvent;
-		    res.status(200).send();
+	let promiseResults = Promise.all(rulePromises);
+	promiseResults.then((savedRules) => {
+		savedRules.forEach((rule) => {
+			newEvent.rules.push({ruleType: rule.ruleType, _id: rule._id, amountRaised: 0});
 		});
-	}
-	// ADD ELSE CLAUSE?
+		return newEvent.save();
+	}).then((savedEvent) => {
+		return res.status(200).send(savedEvent);
+	}).catch((err) => {
+		return res.status(500).send(err);
+	});
 }
 
 // NEED TO ACCOUNT FOR RULES AS WELL
 function updateEventById(req, res) {
-	// update event
+	let fields = ['twitchId', 'startDate', 'description', 'organization', 'rules'];
+	if(!validator.validateFields(req.body, fields)) {
+		return res.status(500).send({err: 'Invalid input object'});
+	}
+
 	StreamEvent.findByIdAndUpdate(req.params.id, req.body, {'new': true}).then((updatedEvent) => {
         res.json(updatedEvent);
 	}).catch((err) => {
@@ -251,10 +166,23 @@ function updateEventById(req, res) {
 }
 
 function createRule(req, res) {
-	let ruleName = req.body.ruleType;
-	let newRule = new RulesModel[ruleName](req.body.rule);
+	let ruleType = req.body.ruleType;
+	if(!validator.validateFieldsByRule(req.body)) {
+		return res.status(500).send({err: 'Invalid input object'});
+	}
+
+	let newRule = new RulesModel[ruleType](req.body.rule); // this should fail on save and go to catch if invalid object
 	newRule.save().then((newRule) => {
-        res.json(updatedEvent);
+        return StreamEvent.findById(req.params.id);
+	}).then((foundEvent) => {
+		foundEvent.rules.push({ruleType: newRule.ruleType, _id: newRule._id, amountRaised: 0});
+		return StreamEvent.findByIdAndUpdate(foundEvent._id, foundEvent, {'new': true});
+	}).then((updatedEvent) => {
+		let responseBody = {                        
+			newRule: newRule,
+			updatedEvent: updatedEvent
+		};
+		return res.status(200).send(responseBody);
 	}).catch((err) => {
 		return res.status(500).send(err);
 	});
@@ -262,8 +190,12 @@ function createRule(req, res) {
 
 function updateRule(req, res) {
 	let ruleName = req.body.ruleType;
+	if(!validator.validateFieldsByRule(req.body)) {
+		return res.status(500).send({err: 'Invalid input object'});
+	}
+
 	RulesModel[ruleName].findByIdAndUpdate(req.body._id, req.body, {'new': true}).then((updatedEvent) => {
-        res.json(updatedEvent);
+        return res.status(200).send(updatedEvent);
 	}).catch((err) => {
 		return res.status(500).send(err);
 	});
@@ -271,97 +203,57 @@ function updateRule(req, res) {
 
 function deleteRule(req, res) {
 	let ruleName = req.body.ruleType;
-	RulesModel[ruleName].remove({id: req.body._id}).then(() => {
-		res.status(200).send();
+	if(!validator.validateFieldsByRule(req.body)) {
+		return res.status(500).send({err: 'Invalid input object'});
+	}
+
+	RulesModel[ruleName].remove({_id: req.body._id}).then(() => {
+		return StreamEvent.findById(req.params.id);
+	}).then((foundEvent) => {
+		let x = 0;
+		for(x; x < foundEvent.rules.length; ++x) {
+			if(req.body._id === foundEvent.rules[x]._id) {
+				foundEvent.rules.splice(x, 1);
+				break;
+			}
+		}
+		return StreamEvent.findByIdAndUpdate(foundEvent._id, foundEvent, {'new': true});
+	}).then((updatedEvent) => {
+		return res.status(200).send(updatedEvent);
 	}).catch((err) => {
 		return res.status(500).send(err);
 	});
 }
 
-// NEED SOME WAY TO CHECK FOR DUPES???
 function deleteEventById(req, res) {
-	// iterate over rules and add documents to correct models
-	let x;
-	let errorEncountered = false;
-	for(x = 0; x < req.body.rules.length; ++x){
-		switch(req.body.rules[x].ruleType){
-			case 'SubRule':
-				RulesModel.SubRule.remove({id: req.body.rules[x]._id}, function(err) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-				});
-				break;
-			case 'FollowerRule':
-				RulesModel.FollowerRule.remove({id: req.body.rules[x]._id}, function(err) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-				});
-				break;
-			case 'PeakViewerRule':
-				RulesModel.PeakViewerRule.remove({id: req.body.rules[x]._id}, function(err) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-				});
-				break;
-			case 'XViewerRule':
-				RulesModel.XViewerRule.remove({id: req.body.rules[x]._id}, function(err) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-				});
-				break;
-			case 'MegaDaysRule':
-				RulesModel.MegaDaysRule.remove({id: req.body.rules[x]._id}, function(err) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-				});
-				break;
-			case 'UptimeRule':
-				RulesModel.UptimeRule.remove({id: req.body.rules[x]._id}, function(err) {
-					if (err) {
-						errorEncountered = true;
-						res.status(500).send(err);
-					}
-				});
-				break;
-			default:
-				res.status(500).send({err: 'Unrecognized rule type'});
-				errorEncountered = true;
-				break;
-		}
+	let rulesList = req.body.rules;
+	let fields = ['_id'];
+	if(!validator.validateFields(req.body, fields)) {
+		return res.status(500).send({err: 'Invalid input object'});
 	}
-
-	// consider changing this to a promise with a .catch
-	if (!errorEncountered) {
-		StreamEvent.remove({id: req.params.id}, function(err) {
-			if (err)
-				res.status(500).send(err);
-			res.status(200).send();
-		});
-	}
-	// ADD ELSE CLAUSE?
+	let deletePromises = rulesList.map((rule) => {
+		return RulesModel[rule.ruleType].remove({_id: rule._id});
+	});
+	let promiseResults = Promise.all(deletePromises);
+	promiseResults.then((empty) => {
+		return StreamEvent.remove({_id: req.params.id});
+	}).then(() => {
+		return res.status(200).send();
+	}).catch((err) => {
+		return res.status(500).send(err);
+	});
 }
 
 // export this router
 module.exports = { 
 	getEvents: getEvents,
- 	getEventsByStatus: getEventsByStatus, 
- 	getEventById: getEventById, 
- 	getRulesFromEventById: getRulesFromEventById, 
- 	createEvent: createEvent,
- 	updateEventById: updateEventById, 
- 	createRule: createRule,
- 	updateRule: updateRule,
- 	deleteRule: deleteRule,
- 	deleteEventById: deleteEventById, 
-// 	updateEventRules: updateEventRules, 
- };
+	getEventsByStatus: getEventsByStatus, 
+	getEventById: getEventById, 
+	getRulesFromEventById: getRulesFromEventById, 
+	createEvent: createEvent,
+	updateEventById: updateEventById, 
+	createRule: createRule,
+	updateRule: updateRule,
+	deleteRule: deleteRule,
+	deleteEventById: deleteEventById, 
+};
