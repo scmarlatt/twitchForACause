@@ -1,5 +1,6 @@
 const del = require('del');
 const gulp = require('gulp');
+const plugins = require('gulp-load-plugins')();
 const cleanCSS = require('gulp-clean-css');
 const colors  = require('colors');
 const concat = require('gulp-concat');
@@ -14,6 +15,20 @@ const sourcemaps = require('gulp-sourcemaps');
 const mocha = require('gulp-mocha');
 const protractor = require('gulp-angular-protractor');
 const Server = require('karma').Server;
+
+// PATHS
+const paths = {
+	scripts: './client/app/**/*.js',
+	styles: ['./client/app/**/*.css', './client/app/**/*.scss'],
+	index: './client/index.html',
+	partials: ['./client/app/**/*.html', '!./client/index.html'],
+	dist: './public/dist',
+	node_modules: [
+			'./node_modules/angular-ui-router/release/angular-ui-router.min.js'
+		],
+	distScripts: './public/dist/js',
+	distStyles: './public/dist/',
+};
 
 // Karma Tests
 /**
@@ -62,33 +77,33 @@ gulp.task('clean:lib', function () {
   return del('public/lib/**/*');
 });
 
-// Lint JavaScript
-gulp.task('lint:js', function() {
-  return gulp.src('client/app/**/*.js')
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'));
+// Clean library directory
+gulp.task('clean:partials', function () {
+  return del('public/dist/**/*.html');
 });
 
-// Generate systemjs-based builds
-/*
-gulp.task('bundle:js', function() {
-  var builder = new sysBuilder('public', './system.config.js');
-  return builder.buildStatic('app', 'public/dist/js/app.min.js')
-    .then(function () {
-      return del(['public/dist/js/add-star-star-here/*', '!public/dist/js/app.min.js']);
-    })
-    .catch(function(err) {
-      console.error('>>> [systemjs-builder] Bundling failed'.bold.green, err);
-    });
+gulp.task('build:partials', function() {
+  gulp.src(['client/app/scripts/**/*.html'])
+  	.pipe(gulp.dest('public/dist/partials'));
 });
-*/
 
-gulp.task('minify:js', function() {
+gulp.task('build:js', function() {
   gulp.src(['client/app/**/*.js'])
-    .pipe(concat('app.min.js'))
-    .pipe(uglify()).on('error', function(e){
+    .pipe(plugins.sourcemaps.init())
+	    .pipe(concat('app.min.js'))
+	    .pipe(uglify()).on('error', function(e){
+	    //.pipe(uglify({mangle: false, compress:true})).on('error', function(e){
             console.log(e);
          })
+	.pipe(plugins.sourcemaps.write())
+    .pipe(gulp.dest('public/dist/js'));
+});
+
+gulp.task('build:libs', function() {
+  gulp.src(paths.node_modules)
+  	.pipe(plugins.sourcemaps.init())
+	    .pipe(concat('vendor.min.js'))
+	.pipe(plugins.sourcemaps.write())
     .pipe(gulp.dest('public/dist/js'));
 });
 
@@ -168,20 +183,19 @@ gulp.task('serve', ['watch:app'], function () {
 });
 
 
-gulp.task('lint', ['lint:js', 'lint:sass']);
-
-gulp.task('clean', ['clean:dist:js', 'clean:dist:css', 'clean:lib']);
-
+gulp.task('clean', function(callback) {
+	runSequence(['clean:dist:js', 'clean:dist:css', 'clean:lib', 'clean:partials'], callback);
+});
 gulp.task('scripts', function(callback) {
-  runSequence(['lint:js', 'clean:dist:js'], 'minify:js', callback);
+  runSequence(['build:js', 'build:libs'], callback);
 });
 gulp.task('styles', function(callback) {
-  runSequence(['lint:sass', 'clean:dist:css'], ['compile:sass', 'minify:css'], callback);
+  runSequence(['compile:sass', 'minify:css'], callback);
 });
 gulp.task('build', function(callback) {
-  runSequence('scripts', 'styles', callback);
+  runSequence(['build:partials'],'scripts', 'styles', callback);
 });
 
 gulp.task('default', function(callback) {
-  runSequence('build', 'serve', callback);
+  runSequence('clean', 'build', 'serve', callback);
 });

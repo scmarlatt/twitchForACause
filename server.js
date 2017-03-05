@@ -76,14 +76,14 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/impact', impactRoutes);
 app.use('/auth', authRoutes);
 
-// view routes
-app.get('/nav', function(req,res){
-	res.sendFile(__dirname + '/client/app/views/nav.html');
-});
+//view routes
+// app.get('/nav', function(req,res){
+// 	res.sendFile(__dirname + '/client/app/views/nav.html');
+// });
 
-app.get('/events', function(req,res){
-	res.sendFile(__dirname + '/client/app/views/events.html');
-});
+// app.get('/events', function(req,res){
+// 	res.sendFile(__dirname + '/client/app/views/events.html');
+// });
 
 app.get('/api/twitch/channel/watch', function (req, res) {
 	channelApi.watchChannelStats('scomar1221');

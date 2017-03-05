@@ -2,11 +2,11 @@
 	'use strict';
 	angular
 		.module('twitchForACause')
-		.factory('eventDataService', eventDataService);
+		.factory('browseEventDataService', browseEventDataService);
 
-	eventDataService.$inject = ['$http'];
+	browseEventDataService.$inject = ['$http'];
 
-	function eventDataService($http) {
+	function browseEventDataService($http) {
 	    return {
 	    	startEvent: startEvent,
 	    	endEvent: endEvent,

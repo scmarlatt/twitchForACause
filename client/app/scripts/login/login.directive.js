@@ -2,22 +2,22 @@
     'use strict';
     angular
         .module('twitchForACause')
-        .directive('navDirective', navDirective);
+        .directive('loginDirective', loginDirective);
 
     //import { htmlTemplate } from 'main.directve.html';
 
-    function navDirective() {
+    function loginDirective() {
         var directive = {
             restrict: 'EA',
             /*scope: {
                 
             },*/
-            templateUrl: 'dist/partials/nav.html',
+            templateUrl: 'dist/partials/login/login.html',
             link: linkFunc,
-            controller: navController,
+            controller: loginController,
             // note: This would be 'ExampleController' (the exported controller name, as string)
             // if referring to a defined controller in its separate file.
-            controllerAs: 'nc',
+            controllerAs: 'login',
             bindToController: true // because the scope is isolated
         };
 
@@ -28,9 +28,9 @@
         }
     }
 
-    navController.$inject = ['$scope', '$http'];
+    loginController.$inject = ['$scope'];
 
-    function navController($scope, $http) {
+    function loginController($scope) {
         // Injecting $scope just for comparison
         var vm = this;
 

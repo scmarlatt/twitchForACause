@@ -1,4 +1,4 @@
 (function () {
 	'use strict';
-	angular.module('twitchForACause', []);
+	angular.module('twitchForACause', ['ui.router']);
 })();

@@ -1,10 +1,11 @@
+<nav-directive></nav-directive>
 <div class="container-fluid tfac-body-wrapper">
     <div class="container-fluid tfac-body">
         <span class="body-left">
             <h2>Upcoming Events</h2>
             <div class="body-left-list">
                 <ul>
-                    <li ng-repeat="event in ec.events">
+                    <li ng-repeat="event in bec.events">
                         <div class="event-list-item">
                             {{event}}
                         </div>
@@ -17,10 +18,10 @@
             <div class="body-right-content">
                  <ul>
                     <li>
-                        We have raised a total of <b>{{ec.totalRaised | currency}}</b>
+                        We have raised a total of <b>{{bec.totalRaised | currency}}</b>
                     </li>
                     <li>
-                        Today, streamers are aiming for a goal of <b>{{ec.todaysGoal | currency}}</b>
+                        Today, streamers are aiming for a goal of <b>{{bec.todaysGoal | currency}}</b>
                     </li>
                     <li>
                         You the viewers...
@@ -33,8 +34,8 @@
 <div class="container-fluid tfac-bottom-wrapper">
     <h2>Want to give back?</h2>
     <button type="button" class="create-event-button" data-toggle="modal" data-target="#newEventModal">Create Event</button>
-    <button type="button" class="create-event-button" ng-click="ec.startEvent();">Start Event</button>
-    <button type="button" class="create-event-button" ng-click="ec.endEvent();">End Event</button>
+    <button type="button" class="create-event-button" ng-click="bec.startEvent();">Start Event</button>
+    <button type="button" class="create-event-button" ng-click="bec.endEvent();">End Event</button>
     <!-- Modal -->
     <div class="modal fade" id="newEventModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">

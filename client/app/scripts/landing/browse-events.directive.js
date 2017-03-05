@@ -2,22 +2,22 @@
     'use strict';
     angular
         .module('twitchForACause')
-        .directive('eventDirective', eventDirective);
+        .directive('browseEventDirective', browseEventDirective);
 
     //import { htmlTemplate } from 'main.directve.html';
 
-    function eventDirective() {
+    function browseEventDirective() {
         var directive = {
             restrict: 'EA',
             /*scope: {
                 
             },*/
-            templateUrl: '/events',
+            templateUrl: 'dist/partials/landing/landing.html',
             link: linkFunc,
-            controller: eventController,
+            controller: browseEventController,
             // note: This would be 'ExampleController' (the exported controller name, as string)
             // if referring to a defined controller in its separate file.
-            controllerAs: 'ec',
+            controllerAs: 'bec',
             bindToController: true // because the scope is isolated
         };
 
@@ -28,9 +28,9 @@
         }
     }
 
-    eventController.$inject = ['$scope', '$http', 'eventDataService'];
+    browseEventController.$inject = ['$scope', '$http', 'browseEventDataService'];
 
-    function eventController($scope, $http, eventDataService) {
+    function browseEventController($scope, $http, browseEventDataService) {
         // Injecting $scope just for comparison
         var vm = this;
 
@@ -48,15 +48,15 @@
         };
         */
         vm.startEvent = function () {
-            eventDataService.startEvent('iddqdow');
+            browseEventDataService.startEvent('iddqdow');
         }
 
         vm.endEvent = function () {
-            eventDataService.endEvent('iddqdow');
+            browseEventDataService.endEvent('iddqdow');
         }
 
         vm.postNewEvent = function (eventData) {
-            eventDataService.postNewEvent(eventData).then(function (response) {
+            browseEventDataService.postNewEvent(eventData).then(function (response) {
                 vm.events = response.data;
             });
         };

@@ -17,13 +17,15 @@
     <link rel="stylesheet" href="/dist/css/global/styles.min.css">
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="/dist/js/vendor.min.js"></script> <!--bundled source-->
     <script src="/dist/js/app.min.js"></script> <!--bundled source-->
 </head>
 <body ng-app="twitchForACause">
-<tfac-directive>
+<ui-view></ui-view>
+<!-- <tfac-directive>
     <nav-directive></nav-directive>
     <event-directive></event-directive>
-</tfac-directive>
+</tfac-directive> -->
 <footer>
     
 </footer>
